@@ -612,6 +612,100 @@
       .cs-stat-number { font-size: clamp(28px, 8vw, 36px); }
     }
 
+    /* ─── FULL-PAGE DARK THEME TRANSITION ───── */
+    /* Transition every colour-bearing surface */
+    body,
+    .site-nav,
+    .nav-logo,
+    .nav-links a,
+    .nav-contact,
+    .cs-back,
+    .cs-section-nav a,
+    .cs-section-nav a.active,
+    .cs-section-heading,
+    .cs-body,
+    .cs-eyebrow,
+    .cs-hero-title,
+    .cs-meta-label,
+    .cs-meta-value,
+    .cs-step-header,
+    .cs-step-body,
+    .cs-divider,
+    .cs-stat-number,
+    .cs-stat-label,
+    .cs-tldr-card,
+    .cs-learning-heading,
+    .cs-dark-example {
+      transition:
+        background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+        background 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.page-dark {
+      background: #121214;
+      color: rgba(255,255,255,0.86);
+    }
+
+    body.page-dark .site-nav {
+      background: linear-gradient(to bottom, #121214 65%, transparent);
+    }
+
+    body.page-dark .nav-logo,
+    body.page-dark .nav-links a,
+    body.page-dark .cs-section-heading,
+    body.page-dark .cs-hero-title,
+    body.page-dark .cs-step-header,
+    body.page-dark .cs-learning-heading {
+      color: #fff;
+    }
+
+    body.page-dark .nav-contact,
+    body.page-dark .cs-back,
+    body.page-dark .cs-eyebrow,
+    body.page-dark .cs-meta-label,
+    body.page-dark .cs-section-nav a {
+      color: rgba(255,255,255,0.45);
+    }
+
+    body.page-dark .cs-section-nav a.active {
+      color: rgba(255,255,255,0.9);
+    }
+
+    body.page-dark .cs-body,
+    body.page-dark .cs-meta-value,
+    body.page-dark .cs-step-body {
+      color: rgba(255,255,255,0.72);
+    }
+
+    body.page-dark .cs-divider {
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    body.page-dark .cs-tldr-card {
+      background: rgba(255,255,255,0.06);
+    }
+
+    body.page-dark .cs-dark-example {
+      background: #1e1e22;
+    }
+
+    /* The ideation section itself is plain — whole page is dark now */
+    .cs-dark-example {
+      margin-top: 40px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #1e1e22;
+    }
+
+    .cs-dark-example img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
     /* ─── FOOTER ─────────────────────────────── */
     .site-footer {
       background: #121214;
@@ -758,7 +852,7 @@
           <h1 class="cs-hero-title">Event Lead Capture and closing the paper card gap</h1>
         </div>
         <div class="cs-hero-image">
-          <video autoplay muted loop playsinline poster="img/event-lead-capture/cover.jpg">
+          <video autoplay muted loop playsinline>
             <source src="img/event-lead-capture/demo.mp4" type="video/mp4" />
           </video>
         </div>
@@ -819,29 +913,10 @@
         <p class="cs-body">The camera direction was clear from the start - bulk badge scanners existed in the US market, but nothing that handled all contact types simultaneously.</p>
         <p class="cs-body">The real design challenge was the camera view itself. Conference rooms are dark; a bright white screen shining back at someone is socially disruptive and off-brand for the moment. For a product that's otherwise light and bright, going dark felt like an anti-pattern. But it was right.</p>
         <p class="cs-body">The harder question was how to keep it feeling like Blinq at all. Brand colour in the viewfinder stood out too much. The answer was restraint: strip everything back, keep it dark and neutral, but carry the brand through radius alone - in the viewport shape, the focus area, the card elements.</p>
-        <div class="cs-slideshow" id="ideationSlideshow">
-          <div class="cs-slideshow-track" id="ideationTrack">
-            <div class="cs-slideshow-slide"><img src="img/event-lead-capture/ideation-1.png" alt="Early ideation - camera view concepts and dark UI explorations" loading="lazy" /></div>
-            <div class="cs-slideshow-slide"><img src="img/event-lead-capture/ideation-2.png" alt="Scanner mode concepts - badge, card and QR code flows" loading="lazy" /></div>
-            <div class="cs-slideshow-slide"><img src="img/event-lead-capture/ideation-3.png" alt="Brand application in dark camera UI - radius and colour explorations" loading="lazy" /></div>
-            <div class="cs-slideshow-slide"><img src="img/event-lead-capture/ideation-4.png" alt="Enrichment flow - contact creation and review screens" loading="lazy" /></div>
-          </div>
-          <button class="cs-slideshow-btn prev" id="ideationPrev" aria-label="Previous slide">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button class="cs-slideshow-btn next" id="ideationNext" aria-label="Next slide">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div class="cs-slideshow-dots" id="ideationDots">
-            <div class="cs-slideshow-dot active"></div>
-            <div class="cs-slideshow-dot"></div>
-            <div class="cs-slideshow-dot"></div>
-            <div class="cs-slideshow-dot"></div>
-          </div>
+        <div class="cs-dark-example">
+          <img src="img/event-lead-capture/DarkUI.png" alt="Dark UI camera view - paper card scanner in use at a networking event" loading="lazy" />
         </div>
       </div>
-
-      <hr class="cs-divider" />
 
       <!-- SOLUTION -->
       <div class="cs-section" id="solution">
@@ -1268,22 +1343,19 @@
       document.addEventListener('keydown', e => { if (e.key === 'Escape' && lb.classList.contains('open')) close(); });
     })();
 
-    // Slideshow
+
+    // Full-page dark theme: fires when ideation section enters/exits viewport
     (() => {
-      const track = document.getElementById('ideationTrack');
-      const dots = Array.from(document.querySelectorAll('#ideationDots .cs-slideshow-dot'));
-      const total = dots.length;
-      let current = 0;
+      const ideation = document.getElementById('ideation');
+      if (!ideation || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      function goTo(n) {
-        current = (n + total) % total;
-        track.style.transform = `translateX(-${current * 100}%)`;
-        dots.forEach((d, i) => d.classList.toggle('active', i === current));
-      }
+      const observer = new IntersectionObserver(([entry]) => {
+        document.body.classList.toggle('page-dark', entry.isIntersecting);
+      }, {
+        threshold: 0.15
+      });
 
-      document.getElementById('ideationPrev').addEventListener('click', () => goTo(current - 1));
-      document.getElementById('ideationNext').addEventListener('click', () => goTo(current + 1));
-      dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+      observer.observe(ideation);
     })();
 
     let ticking = false;
