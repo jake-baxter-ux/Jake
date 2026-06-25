@@ -851,7 +851,7 @@
           <h3 class="cs-step-header">Step 1 - Open the scanner, choose your mode.</h3>
           <p class="cs-step-body">A new tab bar entry point opens the scanner. Users choose between three modes: event badge, paper card, or QR code. The ideal was one unified scanner - but each QR code type reads differently, and combining them caused conflicts. Three explicit modes was the cleaner, more reliable call.</p>
           <div class="cs-phone-mockup">
-            <img src="img/event-lead-capture/mockup-step1.png" alt="Step 1 - Scanner mode selection screen" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
+            <img src="img/event-lead-capture/Step1.png" alt="Step 1 - Scanner mode selection screen" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
           </div>
         </div>
 
@@ -859,7 +859,7 @@
           <h3 class="cs-step-header">Step 2 - Snap and enrich.</h3>
           <p class="cs-step-body">The user takes a photo. OCR and AI extract the contact details, which run through Blinq's enrichment platform - pulling data from multiple providers to build out a fuller contact record.</p>
           <div class="cs-phone-mockup">
-            <img src="img/event-lead-capture/mockup-step2.png" alt="Step 2 - Photo capture and OCR extraction" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
+            <img src="img/event-lead-capture/Step 2.png" alt="Step 2 - Photo capture and OCR extraction" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
           </div>
         </div>
 
@@ -867,7 +867,7 @@
           <h3 class="cs-step-header">Step 3 - Contact created in under two seconds.</h3>
           <p class="cs-step-body">What previously required manual data entry is done. The contact is live in Blinq, enriched, and ready to act on - with a reference back to the original scan.</p>
           <div class="cs-phone-mockup">
-            <img src="img/event-lead-capture/mockup-step3.png" alt="Step 3 - Enriched contact created and ready" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
+            <img src="img/event-lead-capture/step3.gif" alt="Step 3 - Enriched contact created and ready" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
           </div>
         </div>
       </div>
@@ -929,12 +929,17 @@
 
       Render.run(render);
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!prefersReducedMotion) {
-        Runner.run(Runner.create(), engine);
-      } else {
-        // Static frame: settle bodies instantly at the bottom
+      if (prefersReducedMotion) {
         Matter.Engine.update(engine, 1000 * 60);
         Render.lookAt(render, { min: { x: 0, y: 0 }, max: { x: W, y: H } });
+      } else {
+        const cardObserver = new IntersectionObserver(entries => {
+          if (entries[0].isIntersecting) {
+            Runner.run(Runner.create(), engine);
+            cardObserver.disconnect();
+          }
+        }, { threshold: 0.2 });
+        cardObserver.observe(wrap);
       }
 
       const thick = 80;
