@@ -226,6 +226,9 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
       margin-bottom: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .cs-hero-title {
@@ -589,10 +592,19 @@
       }
       .cs-section-nav {
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        overflow-x: auto;
         gap: 0 16px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 4px;
       }
-      .cs-section-nav a { font-size: 13px; }
+      .cs-section-nav::-webkit-scrollbar { display: none; }
+      .cs-section-nav a {
+        font-size: 13px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
       .cs-content {
         padding: 40px var(--gutter) 80px;
         max-width: 100%;
@@ -852,7 +864,7 @@
           <h1 class="cs-hero-title">Event Lead Capture and closing the paper card gap</h1>
         </div>
         <div class="cs-hero-image">
-          <video autoplay muted loop playsinline>
+          <video autoplay muted loop playsinline poster="img/event-lead-capture/cover.jpg">
             <source src="img/event-lead-capture/demo.mp4" type="video/mp4" />
           </video>
         </div>
@@ -942,7 +954,7 @@
           <h3 class="cs-step-header">Step 3 - Contact created in under two seconds.</h3>
           <p class="cs-step-body">What previously required manual data entry is done. The contact is live in Blinq, enriched, and ready to act on - with a reference back to the original scan.</p>
           <div class="cs-phone-mockup">
-            <img src="img/event-lead-capture/step3.gif" alt="Step 3 - Enriched contact created and ready" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
+            <img src="img/event-lead-capture/cf-smart-prompt.mp4.png" alt="Step 3 - Enriched contact created and ready" loading="lazy" />
           </div>
         </div>
       </div>
