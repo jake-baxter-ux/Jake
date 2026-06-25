@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Lead Capture - Jake Baxter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@600&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    @font-face {
+      font-family: 'Zalando Sans';
+      font-weight: 700;
+      font-style: normal;
+      src: local('Zalando Sans Bold'), local('ZalandoSans-Bold'), local('Zalando Sans');
+    }
+    @font-face {
+      font-family: 'Zalando Sans';
+      font-weight: 400;
+      font-style: normal;
+      src: local('Zalando Sans Regular'), local('ZalandoSans-Regular'), local('Zalando Sans');
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      overflow-x: clip;
+      width: 100%;
+    }
+
+    :root {
+      --bg: #F8F8F8;
+      --dark: #000;
+      --text-primary: rgba(0,0,0,0.86);
+      --text-secondary: rgba(0,0,0,0.62);
+      --text-muted: rgba(0,0,0,0.545);
+      --text-emphasis: rgba(50,64,79,0.9);
+      --surface: #f2f2f2;
+      --surface-alt: #ECECEC;
+      --border: rgba(50,64,79,0.1);
+      --border-solid: #D4D4D4;
+      --font-body: 'Zalando Sans', 'Inter', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --gutter: clamp(20px, 4vw, 48px);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    :focus-visible {
+      outline: 2px solid var(--text-primary);
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: var(--gutter);
+      background: var(--dark);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: 0 0 4px 4px;
+      text-decoration: none;
+      z-index: 200;
+      transition: top 0.15s;
+    }
+    .skip-link:focus { top: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: clamp(15px, 1.1vw, 17px);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── NAV ─────────────────────────────────── */
+    .site-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(20px, 2.5vw, 32px) var(--gutter);
+      background: linear-gradient(to bottom, var(--bg) 65%, transparent);
+    }
+
+    .nav-logo {
+      font-family: 'Bitcount Prop Single', var(--font-body);
+      font-weight: 600;
+      font-size: 28px;
+      font-variation-settings: "CRSV" 0, "ELSH" 0, "ELXP" 0;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: normal;
+      text-transform: none;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: clamp(20px, 3vw, 48px);
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-weight: 400;
+      font-size: 16px;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .nav-links a { position: relative; }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 1px; background: currentColor;
+      transform: scaleX(0); transform-origin: right;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
+    .nav-links a:hover { color: var(--text-muted); }
+
+    .nav-contact {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+    .nav-contact:hover { color: var(--text-primary); }
+
+    /* ─── CASE STUDY LAYOUT ──────────────────── */
+    .cs-page {
+      padding-top: clamp(70px, 8vh, 100px);
+      display: grid;
+      grid-template-columns: minmax(200px, 37%) 1fr;
+      min-height: 100vh;
+    }
+
+    .cs-sidebar,
+    .cs-content {
+      min-width: 0;
+    }
+
+    /* ─── SIDEBAR ────────────────────────────── */
+    .cs-sidebar {
+      /* full-height grid cell - sticky works inside it */
+    }
+    .cs-sidebar-inner {
+      position: sticky;
+      top: clamp(70px, 8vh, 100px);
+      padding: clamp(40px, 5vh, 64px) 0 40px clamp(20px, 8.5vw, 164px);
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .cs-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+    .cs-back:hover { color: var(--text-primary); }
+    .cs-back svg { flex-shrink: 0; }
+
+    .cs-section-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .cs-section-nav a {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+      line-height: 22.5px;
+    }
+
+    .cs-section-nav a:hover { color: var(--text-primary); }
+    .cs-section-nav a.active {
+      color: var(--text-emphasis);
+      font-weight: 500;
+    }
+
+    /* ─── MAIN CONTENT ───────────────────────── */
+    .cs-content {
+      padding: clamp(40px, 5vh, 64px) clamp(40px, 14.6vw, 280px) 120px 0;
+      max-width: 894px;
+    }
+
+    /* ─── HERO ───────────────────────────────── */
+    .cs-hero {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      margin-bottom: 80px;
+    }
+
+    .cs-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+    }
+
+    .cs-hero-title {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: clamp(32px, 3.8vw, 54px);
+      line-height: 1.14;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      text-wrap: balance;
+    }
+
+    .cs-hero-image {
+      width: 100%;
+      aspect-ratio: 894 / 904;
+      border-radius: 6px;
+      background: var(--surface-alt);
+      overflow: hidden;
+    }
+
+    .cs-hero-image img,
+    .cs-hero-image video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cs-meta-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .cs-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cs-meta-label {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .cs-meta-value {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    /* ─── CONTENT SECTIONS ───────────────────── */
+    .cs-section {
+      margin-bottom: 80px;
+      scroll-margin-top: 120px;
+    }
+
+    .cs-section-heading {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 32px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      text-wrap: balance;
+      margin-bottom: 24px;
+    }
+
+    .cs-body {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text-primary);
+      line-height: 30px;
+      letter-spacing: 0.63px;
+      overflow-wrap: break-word;
+      text-wrap: pretty;
+    }
+
+    .cs-body + .cs-body,
+    .cs-body + .cs-step {
+      margin-top: 20px;
+    }
+
+    /* ─── TLDR ───────────────────────────────── */
+    .cs-tldr-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .cs-tldr-label {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      line-height: 1.2;
+    }
+
+    /* ─── SLIDESHOW ──────────────────────────── */
+    .cs-slideshow {
+      width: 100%;
+      aspect-ratio: 16/10;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      margin-top: 32px;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .cs-slideshow-track {
+      display: flex;
+      height: 100%;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cs-slideshow-slide {
+      flex: 0 0 100%;
+      height: 100%;
+    }
+
+    .cs-slideshow-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cs-slideshow-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .cs-slideshow-btn:hover { background: #fff; }
+    .cs-slideshow-btn:active { transform: translateY(-50%) scale(0.93); }
+    .cs-slideshow-btn.prev { left: 16px; }
+    .cs-slideshow-btn.next { right: 16px; }
+    .cs-slideshow-btn svg { display: block; }
+
+    .cs-slideshow-dots {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+    }
+
+    .cs-slideshow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .cs-slideshow-dot.active {
+      background: rgba(0,0,0,0.6);
+      transform: scale(1.25);
+    }
+
+    /* ─── LIGHTBOX ───────────────────────────── */
+    .cs-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .cs-lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .cs-lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 6px;
+      object-fit: contain;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+    .cs-lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .cs-lightbox-close:hover { background: rgba(255,255,255,0.25); }
+    .cs-slideshow-slide img { cursor: zoom-in; }
+
+    /* ─── SOLUTION STEPS ─────────────────────── */
+    .cs-step {
+      margin-top: 40px;
+    }
+
+    .cs-step-header {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+
+    .cs-step-body {
+      font-family: var(--font-body);
+      font-size: 20px;
+      color: var(--text-primary);
+      line-height: 30px;
+      letter-spacing: 0.63px;
+      overflow-wrap: break-word;
+      text-wrap: pretty;
+    }
+
+    .cs-phone-mockup {
+      width: 100%;
+      aspect-ratio: 894/650;
+      background: var(--surface);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 24px;
+      overflow: hidden;
+    }
+
+    .cs-phone-mockup img {
+      height: 100%;
+      width: auto;
+      max-width: 100%;
+      display: block;
+    }
+
+    /* ─── LEARNINGS ──────────────────────────── */
+    .cs-learnings {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+      margin-top: 32px;
+    }
+
+    .cs-learning-item h3 {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      margin-bottom: 16px;
+      line-height: 1.2;
+      text-wrap: balance;
+    }
+
+    /* ─── IMPACT STATS ──────────────────────── */
+    .cs-stats {
+      display: flex;
+      gap: 48px;
+      margin: 32px 0 40px;
+    }
+
+    .cs-stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cs-stat-number {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: clamp(36px, 4vw, 52px);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--dark);
+      transition: opacity 0.3s ease;
+    }
+
+    .cs-stats:not(.counted) .cs-stat-number { opacity: 0; }
+    .cs-stats.counted .cs-stat-number { opacity: 1; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cs-stats:not(.counted) .cs-stat-number { opacity: 1; }
+      .nav-links a::after { transition: none; }
+      .cs-slideshow-track { transition: none; }
+      .cs-lightbox { transition: none; }
+    }
+
+    .cs-stat-label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ─── DIVIDER ────────────────────────────── */
+    .cs-divider {
+      border: none;
+      border-top: 1px solid var(--border-solid);
+      margin: 64px 0;
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 900px) {
+      .cs-phone-mockup { aspect-ratio: 4/3; }
+    }
+
+    @media (max-width: 720px) {
+      .cs-phone-mockup { aspect-ratio: 3/4; }
+      .cs-page {
+        grid-template-columns: 1fr;
+      }
+      .cs-sidebar {
+        position: static;
+        height: auto;
+        padding: 24px var(--gutter) 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+      }
+      .cs-sidebar-inner {
+        padding: 24px 0 0 0;
+        width: 100%;
+      }
+      .cs-section-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0 16px;
+      }
+      .cs-section-nav a { font-size: 13px; }
+      .cs-content {
+        padding: 40px var(--gutter) 80px;
+        max-width: 100%;
+      }
+      .cs-meta-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .nav-links { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .cs-meta-row { grid-template-columns: 1fr 1fr; }
+      .cs-stats { gap: 24px; flex-wrap: wrap; }
+      .cs-stat-number { font-size: clamp(28px, 8vw, 36px); }
+    }
+
+    /* ─── FOOTER ─────────────────────────────── */
+    .site-footer {
+      background: #121214;
+      color: rgba(255,255,255,0.98);
+      padding: clamp(48px, 6vw, 96px) clamp(32px, 4vw, 96px) clamp(40px, 5vw, 72px);
+    }
+
+    .footer-cta {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: clamp(28px, 4vw, 54px);
+      line-height: 1.17;
+      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.98);
+      margin-bottom: clamp(32px, 5vw, 72px);
+      text-wrap: balance;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: clamp(32px, 6vw, 80px);
+      align-items: flex-end;
+    }
+
+    .footer-contact {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .footer-contact-label {
+      font-size: clamp(15px, 1.3vw, 20px);
+      color: rgba(255,255,255,0.98);
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .footer-contact-label .arrow { font-size: 0.75em; }
+
+    .footer-contact-value {
+      font-size: clamp(14px, 1.2vw, 18px);
+      color: rgba(255,255,255,0.55);
+    }
+
+    .footer-contact-value a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .footer-contact-value a:hover { color: rgba(255,255,255,0.85); }
+
+    .footer-copy {
+      font-size: clamp(14px, 1.2vw, 18px);
+      color: rgba(255,255,255,0.55);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 480px) {
+      .footer-links { flex-direction: column; align-items: flex-start; }
+      .footer-copy { margin-left: 0; }
+    }
+
+    /* ─── CARD CANVAS ────────────────────────── */
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #F2F2F2;
+      margin-top: 32px;
+    }
+
+    .canvas-wrap canvas { display: block; }
+
+    .canvas-hint {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: rgba(0,0,0,0.28);
+      letter-spacing: 0.1em;
+      pointer-events: none;
+      white-space: nowrap;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <div class="cs-lightbox" id="csLightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+    <button class="cs-lightbox-close" id="csLightboxClose" aria-label="Close preview">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <img id="csLightboxImg" src="" alt="" />
+  </div>
+
+  <!-- NAV -->
+  <nav class="site-nav">
+    <a class="nav-logo" href="portfolio.html">Jake Baxter</a>
+    <ul class="nav-links">
+      <li><a href="portfolio.html#work">Work</a></li>
+      <li><a href="portfolio.html#about">About</a></li>
+    </ul>
+    <a class="nav-contact" href="mailto:jakebaxterwilliams@gmail.com">Contact</a>
+  </nav>
+
+  <div class="cs-page">
+
+    <!-- SIDEBAR -->
+    <aside class="cs-sidebar" aria-label="Case study navigation">
+      <div class="cs-sidebar-inner">
+        <a class="cs-back" href="portfolio.html">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back
+        </a>
+        <ul class="cs-section-nav">
+          <li><a href="#problem">The Problem</a></li>
+          <li><a href="#research">Research</a></li>
+          <li><a href="#ideation">Ideation</a></li>
+          <li><a href="#solution">The Solution</a></li>
+          <li><a href="#impact">Impact</a></li>
+          <li><a href="#learnings">Learnings</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="cs-content" id="main-content">
+
+      <!-- HERO -->
+      <div class="cs-hero">
+        <div>
+          <p class="cs-eyebrow">Blinq &nbsp;•&nbsp; Zero to one - new product</p>
+          <h1 class="cs-hero-title">Event Lead Capture and closing the paper card gap</h1>
+        </div>
+        <div class="cs-hero-image">
+          <video autoplay muted loop playsinline poster="img/event-lead-capture/cover.jpg">
+            <source src="img/event-lead-capture/demo.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div class="cs-meta-row">
+          <div class="cs-meta-item">
+            <span class="cs-meta-label">Role</span>
+            <span class="cs-meta-value">Lead Product Designer</span>
+          </div>
+          <div class="cs-meta-item">
+            <span class="cs-meta-label">Timeline</span>
+            <span class="cs-meta-value">September 2025</span>
+          </div>
+          <div class="cs-meta-item">
+            <span class="cs-meta-label">Team</span>
+            <span class="cs-meta-value">Product, Design and Native engineering team</span>
+          </div>
+          <div class="cs-meta-item">
+            <span class="cs-meta-label">Skills</span>
+            <span class="cs-meta-value">Product Strategy, 0-1 Design, Cross-functional Leadership</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TLDR -->
+      <div class="cs-section" id="tldr">
+        <div class="cs-tldr-card">
+          <p class="cs-tldr-label">TLDR (But you should)</p>
+          <p class="cs-body">I led the zero-to-one design of Event Lead Capture - a badge and business card scanner that uses OCR and AI to create a fully populated contact in under two seconds. Built on the insight that the paper card is still the dominant networking tool, it's generated 200,000+ scans and 150,000 contacts in six months.</p>
+        </div>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- PROBLEM -->
+      <div class="cs-section" id="problem">
+        <h2 class="cs-section-heading">The real competitor wasn't another app - it was the paper business card.</h2>
+        <p class="cs-body">Blinq was strong at helping users share their own details, but at events the other person often handed over a paper card instead. Every paper card handed over was a one-sided exchange: your details went digital, theirs didn't. The real competitor in the digital business card space wasn't another scanning app - it was the paper card itself. Event Lead Capture closed that loop.</p>
+
+        <div class="canvas-wrap" id="cardWrap" role="img" aria-label="Seven business cards scattered in a pile, illustrating the variety of paper cards exchanged at events">
+          <canvas id="cardCanvas"></canvas>
+          <span class="canvas-hint" aria-hidden="true">drag the cards</span>
+        </div>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- RESEARCH -->
+      <div class="cs-section" id="research">
+        <h2 class="cs-section-heading">You can't replicate a conference in a lab.</h2>
+        <p class="cs-body">Research started in the field - attending product meetups and sales meetups, where it became clear sales users carried and exchanged paper cards far more than other groups. But testing a camera-based feature introduced a real constraint: lab conditions couldn't accurately replicate real-world lighting, badge quality, or card stock. The approach became layered: field observation first, then moderated user testing with mocked camera scenarios, then live testing with the founder and sales team at real events. Scrappy, but the only way to get honest signal on a feature like this.</p>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- IDEATION -->
+      <div class="cs-section" id="ideation">
+        <h2 class="cs-section-heading">Dark UI in a bright-brand product - and why that was the right call.</h2>
+        <p class="cs-body">The camera direction was clear from the start - bulk badge scanners existed in the US market, but nothing that handled all contact types simultaneously.</p>
+        <p class="cs-body">The real design challenge was the camera view itself. Conference rooms are dark; a bright white screen shining back at someone is socially disruptive and off-brand for the moment. For a product that's otherwise light and bright, going dark felt like an anti-pattern. But it was right.</p>
+        <p class="cs-body">The harder question was how to keep it feeling like Blinq at all. Brand colour in the viewfinder stood out too much. The answer was restraint: strip everything back, keep it dark and neutral, but carry the brand through radius alone - in the viewport shape, the focus area, the card elements.</p>
+        <div class="cs-slideshow" id="ideationSlideshow">
+          <div class="cs-slideshow-track" id="ideationTrack">
+            <div class="cs-slideshow-slide"><img src="img/event-lead-capture/ideation-1.png" alt="Early ideation - camera view concepts and dark UI explorations" loading="lazy" /></div>
+            <div class="cs-slideshow-slide"><img src="img/event-lead-capture/ideation-2.png" alt="Scanner mode concepts - badge, card and QR code flows" loading="lazy" /></div>
+            <div class="cs-slideshow-slide"><img src="img/event-lead-capture/ideation-3.png" alt="Brand application in dark camera UI - radius and colour explorations" loading="lazy" /></div>
+            <div class="cs-slideshow-slide"><img src="img/event-lead-capture/ideation-4.png" alt="Enrichment flow - contact creation and review screens" loading="lazy" /></div>
+          </div>
+          <button class="cs-slideshow-btn prev" id="ideationPrev" aria-label="Previous slide">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="cs-slideshow-btn next" id="ideationNext" aria-label="Next slide">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="cs-slideshow-dots" id="ideationDots">
+            <div class="cs-slideshow-dot active"></div>
+            <div class="cs-slideshow-dot"></div>
+            <div class="cs-slideshow-dot"></div>
+            <div class="cs-slideshow-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- SOLUTION -->
+      <div class="cs-section" id="solution">
+        <h2 class="cs-section-heading">Scan a badge or card. Contact created in two seconds.</h2>
+
+        <div class="cs-step">
+          <h3 class="cs-step-header">Step 1 - Open the scanner, choose your mode.</h3>
+          <p class="cs-step-body">A new tab bar entry point opens the scanner. Users choose between three modes: event badge, paper card, or QR code. The ideal was one unified scanner - but each QR code type reads differently, and combining them caused conflicts. Three explicit modes was the cleaner, more reliable call.</p>
+          <div class="cs-phone-mockup">
+            <img src="img/event-lead-capture/mockup-step1.png" alt="Step 1 - Scanner mode selection screen" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
+          </div>
+        </div>
+
+        <div class="cs-step">
+          <h3 class="cs-step-header">Step 2 - Snap and enrich.</h3>
+          <p class="cs-step-body">The user takes a photo. OCR and AI extract the contact details, which run through Blinq's enrichment platform - pulling data from multiple providers to build out a fuller contact record.</p>
+          <div class="cs-phone-mockup">
+            <img src="img/event-lead-capture/mockup-step2.png" alt="Step 2 - Photo capture and OCR extraction" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
+          </div>
+        </div>
+
+        <div class="cs-step">
+          <h3 class="cs-step-header">Step 3 - Contact created in under two seconds.</h3>
+          <p class="cs-step-body">What previously required manual data entry is done. The contact is live in Blinq, enriched, and ready to act on - with a reference back to the original scan.</p>
+          <div class="cs-phone-mockup">
+            <img src="img/event-lead-capture/mockup-step3.png" alt="Step 3 - Enriched contact created and ready" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
+          </div>
+        </div>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- IMPACT -->
+      <div class="cs-section" id="impact">
+        <h2 class="cs-section-heading">The paper card assumption was right.</h2>
+        <dl class="cs-stats">
+          <div class="cs-stat-item">
+            <dd class="cs-stat-number">200k+</dd>
+            <dt class="cs-stat-label">Scans</dt>
+          </div>
+          <div class="cs-stat-item">
+            <dd class="cs-stat-number">50%</dd>
+            <dt class="cs-stat-label">Paper business cards</dt>
+          </div>
+          <div class="cs-stat-item">
+            <dd class="cs-stat-number">150k+</dd>
+            <dt class="cs-stat-label">New contacts in Blinq</dt>
+          </div>
+        </dl>
+        <p class="cs-body">More than half of all scans were paper card scans - directly validating the original insight that the paper card was the real gap to close. In a product built around going digital, the biggest unlock turned out to be bridging the analogue world. Event Lead Capture has since become one of Blinq's most-used features, turning a one-sided exchange into a two-way capture.</p>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- LEARNINGS -->
+      <div class="cs-section" id="learnings">
+        <div class="cs-learnings">
+          <div class="cs-learning-item">
+            <h3>Simple to understand isn't always the same as simple to build.</h3>
+            <p class="cs-body">The instinct was one scanner, zero decisions for the user. But a smart auto-detecting scanner would have introduced more confusion, not less - the complexity would have shifted from the UI into the user's head. Three explicit modes gave clarity and control, and the numbers back it up. The lesson: simple isn't always fewer options. Sometimes it's knowing exactly when to stop chasing simplicity.</p>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <script>
+    (() => {
+      const { Engine, Render, Runner, Bodies, Body, World, Mouse, MouseConstraint, Events } = Matter;
+
+      const wrap = document.getElementById('cardWrap');
+      const W = wrap.offsetWidth;
+      const H = 480;
+
+      const engine = Engine.create({ gravity: { y: 1.6 } });
+      const world = engine.world;
+
+      const render = Render.create({
+        canvas: document.getElementById('cardCanvas'),
+        engine,
+        options: { width: W, height: H, wireframes: false, background: '#F2F2F2' }
+      });
+
+      Render.run(render);
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReducedMotion) {
+        Runner.run(Runner.create(), engine);
+      } else {
+        // Static frame: settle bodies instantly at the bottom
+        Matter.Engine.update(engine, 1000 * 60);
+        Render.lookAt(render, { min: { x: 0, y: 0 }, max: { x: W, y: H } });
+      }
+
+      const thick = 80;
+      World.add(world, [
+        Bodies.rectangle(W/2, H + thick/2, W*3, thick, { isStatic: true, render: { fillStyle: '#F2F2F2' } }),
+        Bodies.rectangle(-thick/2, H/2, thick, H*3, { isStatic: true, render: { fillStyle: '#F2F2F2' } }),
+        Bodies.rectangle(W + thick/2, H/2, thick, H*3, { isStatic: true, render: { fillStyle: '#F2F2F2' } }),
+      ]);
+
+      const CW = 200, CH = 118;
+      const MONO = "'DM Mono', monospace";
+      const SANS = "'Inter', sans-serif";
+
+      const cards = [
+        {
+          // Classic white — clean corporate
+          bg: '#ffffff',
+          draw(ctx, w, h) {
+            const L = -w/2, T = -h/2;
+            // Logo mark
+            ctx.fillStyle = '#EBEBEB';
+            ctx.beginPath(); ctx.roundRect(L+16, T+16, 24, 24, 3); ctx.fill();
+            ctx.fillStyle = '#bbb';
+            ctx.font = `500 6px ${MONO}`;
+            ctx.textAlign = 'center';
+            ctx.fillText('◆', L+28, T+32);
+            // Company
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#111';
+            ctx.font = `700 11px ${SANS}`;
+            ctx.fillText('ACME', w/2-16, T+28);
+            // Name
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#111';
+            ctx.font = `600 11px ${SANS}`;
+            ctx.fillText('Sarah Chen', L+16, -6);
+            // Details
+            ctx.fillStyle = 'rgba(0,0,0,0.45)';
+            ctx.font = `400 8px ${SANS}`;
+            ctx.fillText('Head of Sales', L+16, 8);
+            ctx.fillText('sarah@acmeco.com', L+16, 21);
+            ctx.fillText('+1 415 555 0182', L+16, 33);
+          }
+        },
+        {
+          // Near-black — premium minimal
+          bg: '#141414',
+          draw(ctx, w, h) {
+            const L = -w/2, T = -h/2, B = h/2;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `600 12px ${SANS}`;
+            ctx.fillText('Marcus Hill', L+16, -8);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = `400 8px ${SANS}`;
+            ctx.fillText('Founder & CEO', L+16, 6);
+            ctx.fillText('marcus@hillventures.co', L+16, 19);
+            // Hairline
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath(); ctx.moveTo(L+16, B-28); ctx.lineTo(w/2-16, B-28); ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.22)';
+            ctx.font = `500 7.5px ${MONO}`;
+            ctx.fillText('HILL VENTURES', L+16, B-14);
+          }
+        },
+        {
+          // Cream with red accent — editorial
+          bg: '#FAF8F4',
+          draw(ctx, w, h) {
+            const L = -w/2, T = -h/2;
+            // Red bar
+            ctx.fillStyle = '#C0392B';
+            ctx.fillRect(L, T, 4, h);
+            // Name
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = `700 12px ${SANS}`;
+            ctx.fillText('Priya Nair', L+16, -8);
+            ctx.fillStyle = 'rgba(0,0,0,0.45)';
+            ctx.font = `400 8px ${SANS}`;
+            ctx.fillText('Product Manager', L+16, 6);
+            ctx.fillText('p.nair@vertexlabs.io', L+16, 19);
+            // Brand
+            ctx.fillStyle = '#C0392B';
+            ctx.font = `700 8.5px ${SANS}`;
+            ctx.textAlign = 'right';
+            ctx.fillText('VERTEX LABS', w/2-16, h/2-14);
+            ctx.textAlign = 'left';
+          }
+        },
+        {
+          // Deep forest green — premium organic
+          bg: '#1B3A2D',
+          draw(ctx, w, h) {
+            const L = -w/2, T = -h/2, B = h/2;
+            // Leaf mark
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            ctx.beginPath(); ctx.arc(w/2-26, T+26, 20, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = `400 14px ${SANS}`;
+            ctx.textAlign = 'center';
+            ctx.fillText('✦', w/2-26, T+31);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `600 11px ${SANS}`;
+            ctx.fillText('James Wu', L+16, -8);
+            ctx.fillStyle = 'rgba(255,255,255,0.45)';
+            ctx.font = `400 8px ${SANS}`;
+            ctx.fillText('Account Executive', L+16, 6);
+            ctx.fillText('james.wu@greentide.com', L+16, 19);
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.font = `500 7.5px ${MONO}`;
+            ctx.fillText('GREENTIDE', L+16, B-14);
+          }
+        },
+        {
+          // Electric blue — bold brand
+          bg: '#1A35FF',
+          draw(ctx, w, h) {
+            const L = -w/2, T = -h/2, B = h/2;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `600 12px ${SANS}`;
+            ctx.fillText('Lena Kovacs', L+16, -8);
+            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.font = `400 8px ${SANS}`;
+            ctx.fillText('Chief Technology Officer', L+16, 6);
+            ctx.fillText('lena@kovacs.dev', L+16, 19);
+            // Initials badge
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.beginPath(); ctx.roundRect(w/2-44, B-40, 28, 28, 4); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.font = `700 9px ${SANS}`;
+            ctx.textAlign = 'center';
+            ctx.fillText('LK', w/2-30, B-22);
+            ctx.textAlign = 'left';
+          }
+        },
+        {
+          // Warm slate — minimal two-tone
+          bg: '#2E3440',
+          draw(ctx, w, h) {
+            const L = -w/2, T = -h/2, B = h/2;
+            // Accent strip
+            ctx.fillStyle = '#5E81AC';
+            ctx.fillRect(w/2-6, T, 6, h);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `600 12px ${SANS}`;
+            ctx.fillText('Yuki Tanaka', L+16, -8);
+            ctx.fillStyle = 'rgba(255,255,255,0.42)';
+            ctx.font = `400 8px ${SANS}`;
+            ctx.fillText('UX Researcher', L+16, 6);
+            ctx.fillText('yuki@nordlabs.io', L+16, 19);
+            ctx.fillStyle = 'rgba(255,255,255,0.18)';
+            ctx.font = `500 7.5px ${MONO}`;
+            ctx.fillText('NORD LABS', L+16, B-14);
+          }
+        },
+        {
+          // Off-white ruled — understated elegance
+          bg: '#FDFCF8',
+          draw(ctx, w, h) {
+            const L = -w/2, T = -h/2, B = h/2;
+            // Thin border
+            ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+            ctx.lineWidth = 0.75;
+            ctx.strokeRect(L+8, T+8, w-16, h-16);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = `600 11px ${SANS}`;
+            ctx.fillText('Daniel Park', L+20, -8);
+            ctx.fillStyle = 'rgba(0,0,0,0.42)';
+            ctx.font = `400 8px ${SANS}`;
+            ctx.fillText('Creative Director', L+20, 6);
+            ctx.fillText('dan@studiodp.com', L+20, 19);
+            ctx.fillStyle = 'rgba(0,0,0,0.22)';
+            ctx.font = `500 7.5px ${MONO}`;
+            ctx.fillText('STUDIO DP', L+20, B-18);
+          }
+        },
+      ];
+
+      const bodies = cards.map((card, i) => {
+        const col = i % 4;
+        const x = (W / 5) + col * (CW + 16) + (Math.random() * 30 - 15);
+        const y = -CH/2 - i * (CH + 24);
+        const body = Bodies.rectangle(x, y, CW, CH, {
+          restitution: 0.28,
+          friction: 0.65,
+          frictionAir: 0.022,
+          chamfer: { radius: 6 },
+          render: { fillStyle: 'transparent' },
+          label: String(i)
+        });
+        Body.setAngle(body, (Math.random() - 0.5) * 0.5);
+        return body;
+      });
+
+      World.add(world, bodies);
+
+      const mouse = Mouse.create(render.canvas);
+      const mc = MouseConstraint.create(engine, {
+        mouse,
+        constraint: { stiffness: 0.18, render: { visible: false } }
+      });
+      World.add(world, mc);
+      render.mouse = mouse;
+
+      Events.on(render, 'afterRender', () => {
+        const ctx = render.context;
+        bodies.forEach((body, i) => {
+          const card = cards[i];
+          ctx.save();
+          ctx.translate(body.position.x, body.position.y);
+          ctx.rotate(body.angle);
+
+          // Drop shadow
+          ctx.shadowColor = 'rgba(0,0,0,0.18)';
+          ctx.shadowBlur = 18;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 6;
+          ctx.fillStyle = card.bg;
+          ctx.beginPath();
+          ctx.roundRect(-CW/2, -CH/2, CW, CH, 6);
+          ctx.fill();
+
+          // Clear shadow before drawing text
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          card.draw(ctx, CW, CH);
+          ctx.restore();
+        });
+      });
+
+      window.addEventListener('resize', () => {
+        const newW = wrap.offsetWidth;
+        render.canvas.width = newW;
+        render.options.width = newW;
+      });
+    })();
+  </script>
+
+  <script>
+    const sections = Array.from(document.querySelectorAll('.cs-section[id]'));
+    const navLinks = document.querySelectorAll('.cs-section-nav a');
+
+    function setActive(id) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const link = document.querySelector(`.cs-section-nav a[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+
+    const linkedIds = new Set(Array.from(navLinks).map(a => a.getAttribute('href').slice(1)));
+
+    function onScroll() {
+      const threshold = window.innerHeight * 0.35;
+      let current = null;
+      sections.forEach(s => {
+        if (linkedIds.has(s.id) && s.getBoundingClientRect().top <= threshold) current = s.id;
+      });
+      if (current) setActive(current);
+    }
+
+    // Stats count-up
+    (() => {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const statsEl = document.querySelector('.cs-stats');
+      if (!statsEl || prefersReduced) { if (statsEl) statsEl.classList.add('counted'); return; }
+
+      const stats = [
+        { el: statsEl.children[0].querySelector('.cs-stat-number'), end: 200, decimals: 0, suffix: 'k+', delay: 0 },
+        { el: statsEl.children[1].querySelector('.cs-stat-number'), end: 50,  decimals: 0, suffix: '%',  delay: 120 },
+        { el: statsEl.children[2].querySelector('.cs-stat-number'), end: 150, decimals: 0, suffix: 'k+', delay: 240 },
+      ];
+
+      function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+      function countUp(stat) {
+        const duration = 1200;
+        const start = performance.now();
+        stat.el.style.opacity = '1';
+        function tick(now) {
+          const t = Math.min((now - start) / duration, 1);
+          const val = stat.end * easeOut(t);
+          stat.el.textContent = (stat.decimals ? val.toFixed(stat.decimals) : Math.round(val)) + stat.suffix;
+          if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      const observer = new IntersectionObserver(entries => {
+        if (!entries[0].isIntersecting) return;
+        statsEl.classList.add('counted');
+        stats.forEach(s => setTimeout(() => countUp(s), s.delay));
+        observer.disconnect();
+      }, { threshold: 0.5 });
+
+      observer.observe(statsEl);
+    })();
+
+    // Lightbox
+    (() => {
+      const lb = document.getElementById('csLightbox');
+      const lbImg = document.getElementById('csLightboxImg');
+      const lbClose = document.getElementById('csLightboxClose');
+
+      function open(src, alt) {
+        lbImg.src = src;
+        lbImg.alt = alt;
+        lb.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        lbClose.focus();
+      }
+      function close() {
+        lb.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      document.querySelectorAll('.cs-slideshow-slide img').forEach(img => {
+        img.addEventListener('click', () => open(img.src, img.alt));
+      });
+      lbClose.addEventListener('click', close);
+      lb.addEventListener('click', e => { if (e.target === lb) close(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && lb.classList.contains('open')) close(); });
+    })();
+
+    // Slideshow
+    (() => {
+      const track = document.getElementById('ideationTrack');
+      const dots = Array.from(document.querySelectorAll('#ideationDots .cs-slideshow-dot'));
+      const total = dots.length;
+      let current = 0;
+
+      function goTo(n) {
+        current = (n + total) % total;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      }
+
+      document.getElementById('ideationPrev').addEventListener('click', () => goTo(current - 1));
+      document.getElementById('ideationNext').addEventListener('click', () => goTo(current + 1));
+      dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+    })();
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => { onScroll(); ticking = false; });
+        ticking = true;
+      }
+    }, { passive: true });
+    onScroll();
+  </script>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="site-footer">
+    <p class="footer-cta">Let's build something worth talking about.</p>
+    <div class="footer-links">
+      <div class="footer-contact">
+        <div class="footer-contact-label">Get in touch <span class="arrow">↗</span></div>
+        <div class="footer-contact-value"><a href="mailto:jakebaxterwilliams@gmail.com">jakebaxterwilliams@gmail.com</a></div>
+      </div>
+      <div class="footer-contact">
+        <div class="footer-contact-label">Connect on LinkedIn <span class="arrow">↗</span></div>
+        <div class="footer-contact-value"><a href="https://linkedin.com/in/jakebaxterwilliams" target="_blank" rel="noopener">@jakebaxterwilliams</a></div>
+      </div>
+      <span class="footer-copy">©2026</span>
+    </div>
+  </footer>
+
+</body>
+</html>
