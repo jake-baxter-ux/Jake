@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Onefootball — Jake Baxter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@600&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    @font-face {
+      font-family: 'Zalando Sans';
+      font-weight: 700;
+      font-style: normal;
+      src: local('Zalando Sans Bold'), local('ZalandoSans-Bold'), local('Zalando Sans');
+    }
+    @font-face {
+      font-family: 'Zalando Sans';
+      font-weight: 500;
+      font-style: normal;
+      src: local('Zalando Sans Medium'), local('ZalandoSans-Medium'), local('Zalando Sans');
+    }
+    @font-face {
+      font-family: 'Zalando Sans';
+      font-weight: 400;
+      font-style: normal;
+      src: local('Zalando Sans Regular'), local('ZalandoSans-Regular'), local('Zalando Sans');
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      overflow-x: clip;
+      width: 100%;
+    }
+
+    :root {
+      --bg: #F8F8F8;
+      --dark: #000;
+      --text-primary: rgba(0,0,0,0.86);
+      --text-secondary: rgba(0,0,0,0.62);
+      --text-muted: rgba(0,0,0,0.58);
+      --text-emphasis: rgba(50,64,79,0.9);
+      --surface: #f2f2f2;
+      --surface-alt: #ECECEC;
+      --border: rgba(50,64,79,0.1);
+      --border-solid: #D4D4D4;
+      --footer-bg: #121214;
+      --footer-ink: rgba(255,255,255,0.98);
+      --footer-ink-muted: rgba(255,255,255,0.55);
+      --font-body: 'Zalando Sans', 'Inter', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --gutter: clamp(20px, 4vw, 48px);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    :focus-visible {
+      outline: 2px solid var(--text-primary);
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: var(--gutter);
+      background: var(--dark);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: 0 0 4px 4px;
+      text-decoration: none;
+      z-index: 9999;
+      transition: top 0.15s;
+    }
+    .skip-link:focus { top: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: clamp(15px, 1.1vw, 17px);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── NAV ─────────────────────────────────── */
+    .site-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(20px, 2.5vw, 32px) var(--gutter);
+      background: linear-gradient(to bottom, var(--bg) 65%, transparent);
+    }
+
+    .nav-logo {
+      font-family: 'Bitcount Prop Single', var(--font-body);
+      font-weight: 600;
+      font-size: 28px;
+      font-variation-settings: "CRSV" 0, "ELSH" 0, "ELXP" 0;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: normal;
+      text-transform: none;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: clamp(20px, 3vw, 48px);
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-weight: 400;
+      font-size: 16px;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .nav-links a { position: relative; }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 1px; background: currentColor;
+      transform: scaleX(0); transform-origin: right;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
+    .nav-links a:hover { color: var(--text-muted); }
+
+    .nav-contact {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+    .nav-contact:hover { color: var(--text-primary); }
+
+    /* Hamburger (mobile only) */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 24px;
+      height: 1.5px;
+      background: var(--text-primary);
+    }
+
+    .nav-drawer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      background: var(--bg);
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: var(--gutter);
+      gap: 40px;
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: clamp(24px, 6vw, 36px);
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .nav-drawer-close {
+      position: absolute;
+      top: clamp(20px, 2.5vw, 32px);
+      right: var(--gutter);
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ─── CASE STUDY LAYOUT ──────────────────── */
+    .cs-page {
+      padding-top: clamp(70px, 8vh, 100px);
+      display: grid;
+      grid-template-columns: minmax(200px, 37%) 1fr;
+      min-height: 100vh;
+    }
+
+    /* ─── SIDEBAR ────────────────────────────── */
+    .cs-sidebar-inner {
+      position: sticky;
+      top: clamp(70px, 8vh, 100px);
+      padding: clamp(40px, 5vh, 64px) 0 40px clamp(20px, 8.5vw, 164px);
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .cs-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+    .cs-back:hover { color: var(--text-primary); }
+    .cs-back svg { flex-shrink: 0; }
+
+    .cs-section-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .cs-section-nav a {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+      line-height: 22.5px;
+    }
+
+    .cs-section-nav a:hover { color: var(--text-primary); }
+    .cs-section-nav a.active {
+      color: var(--text-emphasis);
+      font-weight: 500;
+    }
+
+    /* ─── MAIN CONTENT ───────────────────────── */
+    .cs-content {
+      padding: clamp(40px, 5vh, 64px) clamp(40px, 14.6vw, 280px) 120px 0;
+      max-width: 894px;
+    }
+
+    /* ─── HERO ───────────────────────────────── */
+    .cs-hero {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      margin-bottom: 80px;
+    }
+
+    .cs-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+    }
+
+    .cs-hero-title {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: clamp(32px, 3.8vw, 54px);
+      line-height: 1.14;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      text-wrap: balance;
+    }
+
+    .cs-hero-image {
+      width: 100%;
+      aspect-ratio: 894 / 904;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .cs-hero-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cs-meta-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .cs-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cs-meta-label {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .cs-meta-value {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    /* ─── CONTENT SECTIONS ───────────────────── */
+    .cs-section {
+      margin-bottom: 80px;
+      scroll-margin-top: 120px;
+    }
+
+    .cs-section-heading {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 32px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      text-wrap: balance;
+      margin-bottom: 24px;
+    }
+
+    .cs-body {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text-primary);
+      line-height: 30px;
+      letter-spacing: 0.63px;
+      overflow-wrap: break-word;
+      text-wrap: pretty;
+    }
+
+    .cs-body + .cs-body { margin-top: 20px; }
+
+    /* ─── TLDR ───────────────────────────────── */
+    .cs-tldr-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .cs-tldr-label {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      line-height: 1.2;
+    }
+
+    /* ─── DARK IMAGE BLOCK ───────────────────── */
+    .cs-dark-image {
+      width: 100%;
+      aspect-ratio: 894/650;
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 32px;
+    }
+
+    .cs-dark-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* ─── SOLUTION STEPS ─────────────────────── */
+    .cs-step {
+      margin-top: 40px;
+    }
+
+    .cs-step-header {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+
+    .cs-step-body {
+      font-family: var(--font-body);
+      font-size: 20px;
+      color: var(--text-primary);
+      line-height: 30px;
+      letter-spacing: 0.63px;
+      overflow-wrap: break-word;
+      text-wrap: pretty;
+    }
+
+    /* ─── IMPACT STATS ──────────────────────── */
+    .cs-stats {
+      display: flex;
+      gap: 48px;
+      margin: 32px 0 40px;
+    }
+
+    .cs-stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cs-stat-number {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: clamp(36px, 4vw, 52px);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--dark);
+      transition: opacity 0.3s ease;
+    }
+
+    .cs-stats:not(.counted) .cs-stat-number { opacity: 0; }
+    .cs-stats.counted .cs-stat-number { opacity: 1; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cs-stats:not(.counted) .cs-stat-number { opacity: 1; }
+    }
+
+    .cs-stat-label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ─── LEARNINGS ──────────────────────────── */
+    .cs-learning-item h3 {
+      font-family: 'Zalando Sans', 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+      margin-bottom: 16px;
+      line-height: 1.2;
+      text-wrap: balance;
+    }
+
+    /* ─── DIVIDER ────────────────────────────── */
+    .cs-divider {
+      border: none;
+      border-top: 1px solid var(--border-solid);
+      margin: 64px 0;
+    }
+
+    /* ─── FOOTER ─────────────────────────────── */
+    .site-footer {
+      background: var(--footer-bg);
+      color: var(--footer-ink);
+      padding: clamp(48px, 6vw, 96px) clamp(32px, 4vw, 96px) clamp(40px, 5vw, 72px);
+    }
+
+    .footer-cta {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: clamp(28px, 4vw, 54px);
+      line-height: 1.17;
+      letter-spacing: -0.01em;
+      color: var(--footer-ink);
+      margin-bottom: clamp(32px, 5vw, 72px);
+      text-wrap: balance;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: clamp(32px, 6vw, 80px);
+      align-items: flex-end;
+    }
+
+    .footer-contact {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .footer-contact-label {
+      font-size: clamp(15px, 1.3vw, 20px);
+      color: var(--footer-ink);
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .footer-contact-label .arrow { font-size: 0.75em; }
+
+    .footer-contact-value {
+      font-size: clamp(14px, 1.2vw, 18px);
+      color: var(--footer-ink-muted);
+    }
+
+    .footer-contact-value a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .footer-contact-value a:hover { color: rgba(255,255,255,0.85); }
+
+    .footer-copy {
+      font-size: clamp(14px, 1.2vw, 18px);
+      color: var(--footer-ink-muted);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* ─── MOTION ─────────────────────────────── */
+    @keyframes heroIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .cs-hero {
+      animation: heroIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cs-hero { animation: none; }
+      .nav-links a::after { transition: none; }
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 900px) and (min-width: 721px) {
+      .cs-sidebar-inner {
+        padding-left: clamp(20px, 4vw, 48px);
+      }
+      .cs-content {
+        padding-right: clamp(24px, 4vw, 48px);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .cs-page {
+        grid-template-columns: 1fr;
+      }
+      .cs-sidebar {
+        position: static;
+        height: auto;
+        padding: 24px var(--gutter) 0;
+      }
+      .cs-sidebar-inner {
+        position: static;
+        padding: 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+      }
+      .cs-section-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0 16px;
+      }
+      .cs-section-nav a { font-size: 13px; }
+      .cs-content {
+        padding: 40px var(--gutter) 80px;
+        max-width: 100%;
+      }
+      .cs-meta-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .nav-links, .nav-contact { display: none; }
+      .nav-hamburger { display: flex; }
+    }
+
+    @media (max-width: 480px) {
+      .footer-links { flex-direction: column; align-items: flex-start; }
+      .footer-copy { margin-left: 0; }
+      .cs-stats { flex-wrap: wrap; gap: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <a class="skip-link" href="#tldr">Skip to content</a>
+
+  <!-- NAV -->
+  <nav class="site-nav">
+    <a class="nav-logo" href="portfolio.html">Jake Baxter</a>
+    <ul class="nav-links">
+      <li><a href="portfolio.html#work">Work</a></li>
+      <li><a href="portfolio.html#about">About</a></li>
+    </ul>
+    <a class="nav-contact" href="mailto:jakebaxterwilliams@gmail.com">Contact</a>
+    <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" onclick="document.querySelector('.nav-drawer').classList.add('open'); this.setAttribute('aria-expanded','true')">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile drawer -->
+  <nav class="nav-drawer" aria-label="Navigation" role="dialog" aria-modal="true">
+    <button class="nav-drawer-close" onclick="document.querySelector('.nav-drawer').classList.remove('open')">Close</button>
+    <a href="portfolio.html#work" onclick="document.querySelector('.nav-drawer').classList.remove('open')">Work</a>
+    <a href="portfolio.html#about" onclick="document.querySelector('.nav-drawer').classList.remove('open')">About</a>
+    <a href="mailto:jakebaxterwilliams@gmail.com" onclick="document.querySelector('.nav-drawer').classList.remove('open')">Contact</a>
+  </nav>
+
+  <div class="cs-page">
+
+    <!-- SIDEBAR -->
+    <aside class="cs-sidebar" aria-label="Case study navigation">
+      <div class="cs-sidebar-inner">
+        <a class="cs-back" href="portfolio.html">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back
+        </a>
+        <ul class="cs-section-nav">
+          <li><a href="#problem">The Problem</a></li>
+          <li><a href="#research">Research</a></li>
+          <li><a href="#ideation">Ideation</a></li>
+          <li><a href="#solution">The Solution</a></li>
+          <li><a href="#impact">Impact</a></li>
+          <li><a href="#learnings">Learnings</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="cs-content">
+
+      <!-- HERO -->
+      <div class="cs-hero">
+        <div>
+          <p class="cs-eyebrow">Onefootball &nbsp;•&nbsp; Senior Product Designer — Monetisation</p>
+          <h1 class="cs-hero-title">Onefootball and designing for the rhythm of a fan</h1>
+        </div>
+        <div class="cs-hero-image">
+          <picture>
+            <source srcset="img/Onefootball/hero.webp" type="image/webp" />
+            <img src="img/Onefootball/hero.png" alt="Onefootball homepage redesign showing a match day experience with personalised content for a fan" loading="eager" width="3336" height="2160" />
+          </picture>
+        </div>
+        <div class="cs-meta-row">
+          <div class="cs-meta-item">
+            <span class="cs-meta-label">Role</span>
+            <span class="cs-meta-value">Senior Product Designer</span>
+          </div>
+          <div class="cs-meta-item">
+            <span class="cs-meta-label">Timeline</span>
+            <span class="cs-meta-value">2021 — 2 weeks</span>
+          </div>
+          <div class="cs-meta-item">
+            <span class="cs-meta-label">Team</span>
+            <span class="cs-meta-value">CPO, Lead Designer, 7-person design sprint team</span>
+          </div>
+          <div class="cs-meta-item">
+            <span class="cs-meta-label">Skills</span>
+            <span class="cs-meta-value">Product Vision, Special Events Design, Monetisation Strategy</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TLDR -->
+      <div class="cs-section" id="tldr">
+        <div class="cs-tldr-card">
+          <h2 class="cs-tldr-label">TLDR (But you should)</h2>
+          <p class="cs-body">Onefootball was a global football app with 20 million users across Brazil, Indonesia, Europe, the UK and beyond — one of the world's most widely used sports platforms at the time. As the sole designer on Onefootball's monetisation team, I was brought into a two-week company-wide design sprint to redesign the Homepage. My focus was Special Events (Euros, World Cup) and ensuring monetisation was woven into the new vision rather than bolted on. The work became a north star that took two years to ship — but it did ship.</p>
+        </div>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- PROBLEM -->
+      <div class="cs-section" id="problem">
+        <h2 class="cs-section-heading">A feature-first app for a fan whose experience is anything but feature-first.</h2>
+        <p class="cs-body">Onefootball had 20 million users but the product was structured around features — news, scores, stats — rather than around the rhythm of being a fan. The CPO pushed the team to rethink this from the ground up: what are the real jobs to be done, and when does each one matter? A platform migration to Flutter created the opportunity to act on it.</p>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- RESEARCH -->
+      <div class="cs-section" id="research">
+        <h2 class="cs-section-heading">A fan's week isn't uniform — and the app shouldn't be either.</h2>
+        <p class="cs-body">The research team brought a key insight: a fan's relationship with their team follows a weekly rhythm. Pre-match, match day, and post-match are three completely different emotional and informational states. The redesign brief became: surface the right jobs at the right moment, rather than making fans hunt through a static feature list.</p>
+        <div class="cs-dark-image">
+          <picture>
+            <source srcset="img/Onefootball/research.webp" type="image/webp" />
+            <img src="img/Onefootball/research.png" alt="Research diagram showing the pre-match, match day and post-match weekly rhythm framework" loading="lazy" width="3840" height="2160" />
+          </picture>
+        </div>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- IDEATION -->
+      <div class="cs-section" id="ideation">
+        <h2 class="cs-section-heading">Seven designers, two weeks, one product — and brand designers who didn't ask if it could work.</h2>
+        <p class="cs-body">The sprint brought together seven people — product designers, brand designers, and researchers. One of the biggest revelations: unconstrained by 'can it be built?', brand designers produced ideas that were visually bolder and more emotionally resonant than anything the product team would have landed on alone. My domain was Special Events and monetisation.</p>
+        <div class="cs-dark-image">
+          <picture>
+            <source srcset="img/Onefootball/ideation.webp" type="image/webp" />
+            <img src="img/Onefootball/ideation.png" alt="Sprint ideation explorations showing bold visual directions for the Onefootball homepage redesign" loading="lazy" width="3840" height="2160" />
+          </picture>
+        </div>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- SOLUTION -->
+      <div class="cs-section" id="solution">
+        <h2 class="cs-section-heading">A time-aware product, and a tournament hub that felt like your country's.</h2>
+
+        <div class="cs-step">
+          <h3 class="cs-step-header">Pre-match — anticipation.</h3>
+          <p class="cs-step-body">News, predictions, previous match analysis, predicted lineups. Content surfaced around what fans are looking for before the whistle.</p>
+          <div class="cs-dark-image">
+            <picture>
+              <source srcset="img/Onefootball/step1.webp" type="image/webp" />
+              <img src="img/Onefootball/step1.png" alt="Pre-match homepage experience showing news, predictions, and expected lineups surfaced 4–5 days before match day" loading="lazy" width="3840" height="2160" />
+            </picture>
+          </div>
+        </div>
+
+        <div class="cs-step">
+          <h3 class="cs-step-header">Match day — the pinnacle.</h3>
+          <p class="cs-step-body">Live scores, match timeline, real-time updates. The pinnacle moment — everything else steps aside.</p>
+          <div class="cs-dark-image">
+            <picture>
+              <source srcset="img/Onefootball/step2.webp" type="image/webp" />
+              <img src="img/Onefootball/step2.png" alt="Match day 'For You' homepage showing live scores and real-time updates on match day" loading="lazy" width="3840" height="2160" />
+            </picture>
+          </div>
+        </div>
+
+        <div class="cs-step">
+          <h3 class="cs-step-header">Post-match — reflection.</h3>
+          <p class="cs-step-body">Highlights, analysis, post-game breakdown. The experience winds down with the content fans want after the final whistle.</p>
+          <div class="cs-dark-image">
+            <picture>
+              <source srcset="img/Onefootball/step3.webp" type="image/webp" />
+              <img src="img/Onefootball/step3.png" alt="Post-match Man Utd tab showing highlights and analysis in the 1–2 days after match day" loading="lazy" width="3840" height="2160" />
+            </picture>
+          </div>
+        </div>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- IMPACT -->
+      <div class="cs-section" id="impact">
+        <h2 class="cs-section-heading">Designed for a future that took two years to arrive.</h2>
+        <div class="cs-stats">
+          <div class="cs-stat-item">
+            <span class="cs-stat-number">20M</span>
+            <span class="cs-stat-label">Global users</span>
+          </div>
+          <div class="cs-stat-item">
+            <span class="cs-stat-number">2yrs</span>
+            <span class="cs-stat-label">Vision to live product</span>
+          </div>
+          <div class="cs-stat-item" data-countup>
+            <span class="cs-stat-number">7</span>
+            <span class="cs-stat-label">Designers in the sprint</span>
+          </div>
+        </div>
+        <p class="cs-body">The work wasn't shipped immediately — it was presented at an all-hands as a vision for where the product could head. Two years later, components and experiences from that sprint are visible in the live product. Not many companies invest in a vision that far ahead. Seeing it emerge is its own kind of success.</p>
+      </div>
+
+      <hr class="cs-divider" />
+
+      <!-- LEARNINGS -->
+      <div class="cs-section" id="learnings">
+        <div class="cs-learning-item">
+          <h3>Bring brand designers in early — they'll go somewhere you won't.</h3>
+          <p class="cs-body">Product designers can get anchored in what already exists. Brand designers, unconstrained by feasibility, produced some of the most visually striking and emotionally resonant ideas in the sprint. Create the conditions for that kind of thinking earlier, not as a final polish pass.</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const sections = Array.from(document.querySelectorAll('.cs-section[id]'));
+    const navLinks = document.querySelectorAll('.cs-section-nav a');
+    const linkedIds = new Set(Array.from(navLinks).map(a => a.getAttribute('href').slice(1)));
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Active nav highlight
+    function setActive(id) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const link = document.querySelector(`.cs-section-nav a[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+
+    function onScroll() {
+      const threshold = window.innerHeight * 0.35;
+      let current = null;
+      sections.forEach(s => {
+        if (linkedIds.has(s.id) && s.getBoundingClientRect().top <= threshold) current = s.id;
+      });
+      if (current) setActive(current);
+    }
+
+    // Section scroll reveals — only hide sections that start off-screen
+    if (!prefersReduced) {
+      const revealObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          el.style.transition = 'opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1)';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+          revealObserver.unobserve(el);
+        });
+      }, { threshold: 0.08 });
+
+      sections.forEach(s => {
+        if (s.getBoundingClientRect().top > window.innerHeight * 0.85) {
+          s.style.opacity = '0';
+          s.style.transform = 'translateY(18px)';
+          revealObserver.observe(s);
+        }
+      });
+    }
+
+    // Stats count-up — CSS handles 20M and 2yrs fade via transition; JS counts up the numeric 7
+    (() => {
+      const statsEl = document.querySelector('.cs-stats');
+      if (!statsEl) return;
+      if (prefersReduced) { statsEl.classList.add('counted'); return; }
+
+      const countEl = statsEl.querySelector('[data-countup] .cs-stat-number');
+      function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+      const observer = new IntersectionObserver(entries => {
+        if (!entries[0].isIntersecting) return;
+        statsEl.classList.add('counted');
+        // Stagger the numeric count-up slightly after the CSS fade
+        setTimeout(() => {
+          const duration = 1100;
+          const start = performance.now();
+          (function tick(now) {
+            const t = Math.min((now - start) / duration, 1);
+            countEl.textContent = Math.round(7 * easeOut(t));
+            if (t < 1) requestAnimationFrame(tick);
+          })(performance.now());
+        }, 140);
+        observer.disconnect();
+      }, { threshold: 0.5 });
+
+      observer.observe(statsEl);
+    })();
+
+    // Mobile drawer
+    const drawer = document.querySelector('.nav-drawer');
+    const openBtn = document.querySelector('.nav-hamburger');
+    const closeBtn = document.querySelector('.nav-drawer-close');
+    function trapFocus(e) {
+      const focusable = [...drawer.querySelectorAll('a, button')];
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.key === 'Tab') {
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+      if (e.key === 'Escape') { drawer.classList.remove('open'); openBtn.setAttribute('aria-expanded', 'false'); openBtn.focus(); drawer.removeEventListener('keydown', trapFocus); }
+    }
+    openBtn.addEventListener('click', () => { drawer.classList.add('open'); openBtn.setAttribute('aria-expanded', 'true'); closeBtn.focus(); drawer.addEventListener('keydown', trapFocus); });
+    closeBtn.addEventListener('click', () => { drawer.classList.remove('open'); openBtn.setAttribute('aria-expanded', 'false'); openBtn.focus(); drawer.removeEventListener('keydown', trapFocus); });
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => { onScroll(); ticking = false; });
+        ticking = true;
+      }
+    }, { passive: true });
+    onScroll();
+  </script>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="site-footer">
+    <p class="footer-cta">Let's build something worth talking about.</p>
+    <div class="footer-links">
+      <div class="footer-contact">
+        <div class="footer-contact-label">Get in touch <span class="arrow">↗</span></div>
+        <div class="footer-contact-value"><a href="mailto:jakebaxterwilliams@gmail.com">jakebaxterwilliams@gmail.com</a></div>
+      </div>
+      <div class="footer-contact">
+        <div class="footer-contact-label">Connect on LinkedIn <span class="arrow">↗</span></div>
+        <div class="footer-contact-value"><a href="https://linkedin.com/in/jakebaxterwilliams" target="_blank" rel="noopener">@jakebaxterwilliams</a></div>
+      </div>
+      <span class="footer-copy">©2026</span>
+    </div>
+  </footer>
+
+</body>
+</html>
