@@ -479,6 +479,12 @@
       position: relative;
     }
 
+    .work-image picture {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
     .work-image img,
     .work-image video {
       width: 100%;
@@ -1027,10 +1033,10 @@
       </div>
     </div>
 
-    <div class="work-item" style="display:none">
+    <div class="work-item">
       <div class="container">
         <div class="work-split">
-          <div class="work-info">
+          <a href="onefootball.html" class="work-info" aria-label="View Onefootball case study">
             <h2 class="work-title">Onefootball day of a fan</h2>
             <p class="work-desc">Designed an immersive match-day companion for OneFootball's 20 million monthly fans — bringing the full emotion of game day to mobile.</p>
             <table class="work-table">
@@ -1038,10 +1044,13 @@
               <tr><td>Role</td><td>Product Designer</td></tr>
               <tr><td>Scope</td><td>UI/UX Design, Prototyping</td></tr>
             </table>
-          </div>
-          <div class="work-image img-blue">
-            <span class="img-placeholder-label">Project image</span>
-          </div>
+          </a>
+          <a href="onefootball.html" class="work-image" aria-label="View Onefootball case study">
+            <picture>
+              <source srcset="img/Onefootball/hero.webp" type="image/webp" />
+              <img src="img/Onefootball/hero.png" alt="Onefootball homepage redesign showing the match day experience" loading="lazy" />
+            </picture>
+          </a>
         </div>
       </div>
     </div>
