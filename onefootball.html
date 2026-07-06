@@ -51,6 +51,13 @@
       --font-body: 'Zalando Sans', 'Inter', sans-serif;
       --font-mono: 'DM Mono', monospace;
       --gutter: clamp(20px, 4vw, 48px);
+
+      /* Page-scoped accent, pulled from the pitch — used nowhere else in the system */
+      --of-accent: #19AF72;
+      --of-accent-rgb: 25, 175, 114;
+      --of-accent-soft: rgba(25, 175, 114, 0.1);
+      --of-accent-text: #117A50; /* darker, same hue — used for small text so it still clears 4.5:1 on --bg */
+      --of-accent-large: #159561; /* closer to the true green — safe for large/bold text needing only 3:1 */
     }
 
     html { scroll-behavior: smooth; }
@@ -255,8 +262,41 @@
 
     .cs-section-nav a:hover { color: var(--text-primary); }
     .cs-section-nav a.active {
-      color: var(--text-emphasis);
+      color: var(--of-accent-text);
       font-weight: 500;
+    }
+
+    /* ─── MATCH CLOCK ─────────────────────────── */
+    .cs-matchclock {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+    .cs-matchclock-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--of-accent);
+      flex-shrink: 0;
+      animation: livePulse 1.8s ease-in-out infinite;
+    }
+    .cs-matchclock-time {
+      font-weight: 500;
+      color: var(--of-accent-text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.75); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cs-matchclock-dot { animation: none; }
     }
 
     /* ─── MAIN CONTENT ───────────────────────── */
@@ -281,6 +321,7 @@
       letter-spacing: 0.04em;
       margin-bottom: 10px;
     }
+    .cs-eyebrow .sep { color: var(--of-accent-text); }
 
     .cs-hero-title {
       font-family: 'Zalando Sans', 'Inter', sans-serif;
@@ -299,6 +340,14 @@
       border-radius: 8px;
       background: #000;
       overflow: hidden;
+      clip-path: inset(0 0 0 0);
+      animation: imgWipe 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    }
+
+    .cs-hero-image:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 44px -16px rgba(var(--of-accent-rgb), 0.35);
     }
 
     .cs-hero-image img {
@@ -392,6 +441,20 @@
       border-radius: 16px;
       overflow: hidden;
       margin-top: 32px;
+      clip-path: inset(0 0 0 0);
+      transition: clip-path 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    }
+
+    .cs-dark-image.cs-img-hidden { clip-path: inset(0 100% 0 0); }
+
+    .cs-dark-image:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 44px -16px rgba(var(--of-accent-rgb), 0.3);
+    }
+
+    @keyframes imgWipe {
+      from { clip-path: inset(0 100% 0 0); }
+      to   { clip-path: inset(0 0 0 0); }
     }
 
     .cs-dark-image img {
@@ -426,6 +489,32 @@
       text-wrap: pretty;
     }
 
+    .cs-live-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--of-accent-text);
+      margin-left: 12px;
+      vertical-align: middle;
+    }
+
+    .cs-live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--of-accent);
+      animation: livePulse 1.6s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cs-live-dot { animation: none; }
+    }
+
     /* ─── IMPACT STATS ──────────────────────── */
     .cs-stats {
       display: flex;
@@ -445,15 +534,23 @@
       font-size: clamp(36px, 4vw, 52px);
       letter-spacing: -0.03em;
       line-height: 1;
-      color: var(--dark);
+      color: var(--of-accent-large);
       transition: opacity 0.3s ease;
     }
 
     .cs-stats:not(.counted) .cs-stat-number { opacity: 0; }
     .cs-stats.counted .cs-stat-number { opacity: 1; }
 
+    .cs-stat-item.goal-flash .cs-stat-number { animation: goalFlash 0.7s ease-out; }
+    @keyframes goalFlash {
+      0%   { text-shadow: 0 0 0 rgba(var(--of-accent-rgb), 0); }
+      30%  { text-shadow: 0 0 22px rgba(var(--of-accent-rgb), 0.6); }
+      100% { text-shadow: 0 0 0 rgba(var(--of-accent-rgb), 0); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .cs-stats:not(.counted) .cs-stat-number { opacity: 1; }
+      .cs-stat-item.goal-flash .cs-stat-number { animation: none; }
     }
 
     .cs-stat-label {
@@ -606,7 +703,9 @@
 
     @media (prefers-reduced-motion: reduce) {
       .cs-hero { animation: none; }
+      .cs-hero-image { animation: none; }
       .nav-links a::after { transition: none; }
+      .cs-hero-image:hover, .cs-dark-image:hover { transform: none; }
     }
 
     /* ─── RESPONSIVE ─────────────────────────── */
@@ -703,6 +802,10 @@
           </svg>
           Back
         </a>
+        <div class="cs-matchclock" aria-hidden="true">
+          <span class="cs-matchclock-dot"></span>
+          <span class="cs-matchclock-time" id="csMatchClockTime">KO</span>
+        </div>
         <ul class="cs-section-nav">
           <li><a href="#problem">The Problem</a></li>
           <li><a href="#research">Research</a></li>
@@ -720,7 +823,7 @@
       <!-- HERO -->
       <div class="cs-hero">
         <div>
-          <p class="cs-eyebrow">Onefootball &nbsp;•&nbsp; Senior Product Designer, Monetisation</p>
+          <p class="cs-eyebrow">Onefootball &nbsp;<span class="sep">•</span>&nbsp; Senior Product Designer, Monetisation</p>
           <h1 class="cs-hero-title">Onefootball and designing for the rhythm of a fan</h1>
         </div>
         <div class="cs-hero-image">
@@ -811,7 +914,7 @@
         </div>
 
         <div class="cs-step">
-          <h3 class="cs-step-header">Match day: the pinnacle.</h3>
+          <h3 class="cs-step-header">Match day: the pinnacle.<span class="cs-live-tag"><span class="cs-live-dot"></span>Live</span></h3>
           <p class="cs-step-body">Live scores, match timeline, real-time updates. The pinnacle moment. Everything else steps aside.</p>
           <div class="cs-dark-image">
             <picture>
@@ -899,6 +1002,8 @@
           el.style.transition = 'opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1)';
           el.style.opacity = '1';
           el.style.transform = 'translateY(0)';
+          // Images wipe open in the same beat, distinct from the section's fade+rise
+          el.querySelectorAll('.cs-dark-image').forEach(img => img.classList.remove('cs-img-hidden'));
           revealObserver.unobserve(el);
         });
       }, { threshold: 0.08 });
@@ -907,6 +1012,7 @@
         if (s.getBoundingClientRect().top > window.innerHeight * 0.85) {
           s.style.opacity = '0';
           s.style.transform = 'translateY(18px)';
+          s.querySelectorAll('.cs-dark-image').forEach(img => img.classList.add('cs-img-hidden'));
           revealObserver.observe(s);
         }
       });
@@ -918,7 +1024,8 @@
       if (!statsEl) return;
       if (prefersReduced) { statsEl.classList.add('counted'); return; }
 
-      const countEl = statsEl.querySelector('[data-countup] .cs-stat-number');
+      const countItem = statsEl.querySelector('[data-countup]');
+      const countEl = countItem.querySelector('.cs-stat-number');
       function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 
       const observer = new IntersectionObserver(entries => {
@@ -931,7 +1038,11 @@
           (function tick(now) {
             const t = Math.min((now - start) / duration, 1);
             countEl.textContent = Math.round(7 * easeOut(t));
-            if (t < 1) requestAnimationFrame(tick);
+            if (t < 1) {
+              requestAnimationFrame(tick);
+            } else {
+              countItem.classList.add('goal-flash');
+            }
           })(performance.now());
         }, 140);
         observer.disconnect();
@@ -956,14 +1067,28 @@
     openBtn.addEventListener('click', () => { drawer.classList.add('open'); openBtn.setAttribute('aria-expanded', 'true'); closeBtn.focus(); drawer.addEventListener('keydown', trapFocus); });
     closeBtn.addEventListener('click', () => { drawer.classList.remove('open'); openBtn.setAttribute('aria-expanded', 'false'); openBtn.focus(); drawer.removeEventListener('keydown', trapFocus); });
 
+    // Match clock — reading progress through the case study, framed as a 90-minute match
+    const matchClockTime = document.getElementById('csMatchClockTime');
+    const pageEl = document.querySelector('.cs-page');
+    function updateMatchClock() {
+      if (!matchClockTime || !pageEl) return;
+      const start = pageEl.offsetTop;
+      const end = start + pageEl.offsetHeight - window.innerHeight;
+      const fraction = Math.min(Math.max((window.scrollY - start) / (end - start), 0), 1);
+      if (fraction <= 0) matchClockTime.textContent = 'KO';
+      else if (fraction >= 1) matchClockTime.textContent = 'FT';
+      else matchClockTime.textContent = Math.max(1, Math.round(fraction * 90)) + "'";
+    }
+
     let ticking = false;
     window.addEventListener('scroll', () => {
       if (!ticking) {
-        requestAnimationFrame(() => { onScroll(); ticking = false; });
+        requestAnimationFrame(() => { onScroll(); updateMatchClock(); ticking = false; });
         ticking = true;
       }
     }, { passive: true });
     onScroll();
+    updateMatchClock();
 
     // Lightbox
     (() => {
